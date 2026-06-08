@@ -1,0 +1,23 @@
+[project]
+name = "logtap"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "James Carroll", email = "james@jamescarroll.info" }
+]
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+logtap = "logtap:main"
+
+[build-system]
+requires = ["uv_build>=0.11.19,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "ruff>=0.15.16",
+]
