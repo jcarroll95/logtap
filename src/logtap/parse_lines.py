@@ -3,6 +3,7 @@ from logtap.models import LogLine
 from datetime import datetime
 
 def parse_lines(file, stats):
+    """Parse log lines from a given file into record objects for aggregation"""
     # This regex pattern looks for:
     # 1. Non-whitespace (\S+)
     # 2. Bracketed content \[(.*?)\]
@@ -24,7 +25,8 @@ def parse_lines(file, stats):
         stats.total += 1
         match = LOG_PATTERN.match(line.strip())
         if not match:
-            return None
+            # can't return none here because it will stop the generator
+            continue
 
         data = match.groupdict()
 

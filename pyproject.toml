@@ -6,11 +6,11 @@ readme = "README.md"
 authors = [
     { name = "James Carroll", email = "james@jamescarroll.info" }
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.13"
 dependencies = []
 
 [project.scripts]
-logtap = "logtap:main"
+logtap = "logtap.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.11.19,<0.12.0"]

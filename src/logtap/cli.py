@@ -2,8 +2,10 @@ import argparse
 from logtap.parse_lines import parse_lines
 from logtap.aggregator import aggregate
 from logtap.models import ParseStats
+from logtap.reporter import reporter
 
 def main():
+    """The CLI main interface: accept arguments and run logtap on the specified file"""
     parser = argparse.ArgumentParser(description="The logtap CLI interface")
 
     parser.add_argument("filename", help="Path to log file")
@@ -22,7 +24,7 @@ def main():
         record_stream = parse_lines(file, stats)
         # file will close when we exit the indent, so we have to stay indented
         # to keep the file openfor the generator
-        record_aggregate = aggregate(record_stream, stats)
+        stats_report = aggregate(record_stream, stats)
 
     # done with file access
     formatted_report = reporter(stats_report)
