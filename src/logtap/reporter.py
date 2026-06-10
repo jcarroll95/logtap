@@ -8,7 +8,7 @@ def reporter(report):
     if (report.lines_total == 0):
         error_rate = 0
     else:
-        error_rate = (report.status_classes['4xx'] + report.status_classes['5xx'])/report.lines_total * 100
+        error_rate = (report.status_classes['4xx'] + report.status_classes['5xx'])/report.lines_parsed * 100
     error_rate = round(error_rate, 2)
 
     return f"""

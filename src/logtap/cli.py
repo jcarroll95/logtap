@@ -1,4 +1,5 @@
 import argparse
+import sys
 from logtap.parse_lines import parse_lines
 from logtap.aggregator import aggregate
 from logtap.models import ParseStats
@@ -13,7 +14,7 @@ def main():
     args = parser.parse_args()
 
     filename = args.filename
-    print(filename)
+
 
     # let's define a parsing stats container
     stats = ParseStats()
@@ -29,6 +30,8 @@ def main():
     # done with file access
     formatted_report = reporter(stats_report)
     print(formatted_report)
+
+    sys.exit(0)
 
 # this is the guard that tells python to only execute the entire file if it's being used as the main entry point
 # of the program, not just having a function imported etc
