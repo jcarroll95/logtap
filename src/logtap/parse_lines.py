@@ -26,6 +26,9 @@ def parse_lines(file, stats):
         match = LOG_PATTERN.match(line.strip())
         if not match:
             # can't return none here because it will stop the generator
+            # can't rely on stats.skipped increment for record not created because one field bad
+            # still creates a record
+            stats.skipped += 1
             continue
 
         data = match.groupdict()
