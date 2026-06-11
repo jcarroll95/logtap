@@ -40,7 +40,7 @@ def test_aggregate_counts_correctly():
     stats.parsed = 2
 
     # Act: Run the aggregation logic
-    report = aggregate(records, stats)
+    report = aggregate(records, stats, 5)
 
     # Assert: Verify the results
     # Status codes are correctly grouped

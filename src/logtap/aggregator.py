@@ -10,7 +10,7 @@ from logtap.models import Report
 from collections import Counter
 
 
-def aggregate(records: Iterator[LogLine], stats: ParseStats):
+def aggregate(records: Iterator[LogLine], stats: ParseStats, top_n: int) -> Report:
     """Aggregate parsed log records into a report object for later output"""
     status_counts = [0] * 6
     total_bytes = 0
@@ -43,8 +43,8 @@ def aggregate(records: Iterator[LogLine], stats: ParseStats):
             if record.timestamp > timespan_end:
                 timespan_end = record.timestamp
 
-    top_n_ips = ip_counter.most_common(5)
-    top_n_paths = path_counter.most_common(5)
+    top_n_ips = ip_counter.most_common(top_n)
+    top_n_paths = path_counter.most_common(top_n)
 
     report = Report(
         lines_total=stats.total,

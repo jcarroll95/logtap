@@ -5,7 +5,7 @@ object to be passed to the aggregator.py which aggregates and processes the data
 track total, skipped, and parsed log lines.
 """
 
-from typing import TextIO
+from typing import TextIO, Any, Generator
 import re
 import logging
 import ipaddress
@@ -13,7 +13,7 @@ from logtap.models import LogLine, ParseStats
 from datetime import datetime
 
 
-def is_valid_ip(ip_str: str):
+def is_valid_ip(ip_str: str) -> bool:
     try:
         ipaddress.ip_address(ip_str)
         return True
@@ -21,7 +21,7 @@ def is_valid_ip(ip_str: str):
         return False
 
 
-def parse_lines(file: TextIO, stats: ParseStats):
+def parse_lines(file: TextIO, stats: ParseStats, quiet: bool) -> Generator[LogLine, Any, None]:
     """Parse log lines from a given file into record objects for aggregation"""
     logger = logging.getLogger(__name__)
 
@@ -59,10 +59,8 @@ def parse_lines(file: TextIO, stats: ParseStats):
         stats.total += 1
         match = LOG_PATTERN.match(line.strip())
         if not match:
-            # can't return none here because it will stop the generator
-            # can't rely on stats.skipped increment for record not created because one field bad
-            # still creates a record
-            logger.warning(f"Skipping bad log line: {line.strip()}")
+            if not quiet:
+                logger.warning(f"Skipping bad log line: \n{line.strip()}")
             stats.skipped += 1
             continue
 
@@ -78,13 +76,15 @@ def parse_lines(file: TextIO, stats: ParseStats):
             # Format: 10/Oct/2025:13:55:36 -0700
             ts = datetime.strptime(data["timestamp"], "%d/%b/%Y:%H:%M:%S %z")
         except ValueError:
-            logger.warning(f"Skipping bad timestamp: {data['timestamp']}")
+            if not quiet:
+                logger.warning(f"Skipping line with bad timestamp:  \n{line.strip()}")
             stats.skipped += 1
             continue
 
         # validate request method, uri, protocol present
         if not data["method"] or not data["uri"] or not data["protocol"]:
-            logger.warning("Skipping missing fields for method, uri, or protocol")
+            if not quiet:
+                logger.warning(f"Skipping line with missing fields for method, uri, or protocol: \n{line.strip()}")
             stats.skipped += 1
             continue
 
@@ -92,7 +92,8 @@ def parse_lines(file: TextIO, stats: ParseStats):
         if data["status"].isdigit():
             status = int(data["status"])
         else:
-            logger.warning(f"Skipping bad status code: {data['status']}")
+            if not quiet:
+                logger.warning(f"Skipping line with bad status code: \n{line.strip()}")
             stats.skipped += 1
             continue
 

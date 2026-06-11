@@ -42,3 +42,9 @@ class Report:
     top_paths: list[tuple[str, int]]
     timespan_start: datetime
     timespan_end: datetime
+    @property
+    def error_rate(self) -> float:
+        if self.lines_parsed == 0:
+            return 0.0
+        rate = (self.status_classes["4xx"] + self.status_classes["5xx"]) / self.lines_parsed
+        return round(rate * 100, 2)

@@ -18,8 +18,8 @@ def main():
 
     # Set up the internal app log, root logger
     logging.basicConfig(
-        filename="logtap.log",
-        filemode="a",  # 'a' to append, 'w' to overwrite
+        #filename="logtap.log",
+        #filemode="a",  # 'a' to append, 'w' to overwrite
         level=logging.INFO,  # Capture INFO and more severe logs
         format="%(asctime)s - %(levelname)s - %(message)s",
     )
@@ -28,11 +28,30 @@ def main():
     parser = argparse.ArgumentParser(
         prog="LogTap",
         description="LogTap is a Common Log Format (CLF) parser and reporter",
-        epilog="try"
+        epilog="uv run logtap <filename> to run",
     )
-    parser.add_argument("filename", type=str, help="Path to log file")
+    parser.add_argument(
+        "file",
+        nargs="?",
+        type=argparse.FileType("r"),
+        default=sys.stdin,
+        help="Path to log file (defaults to stdin if omitted)"
+    )
+    parser.add_argument(
+        "-t", "--top",
+        type=int,
+        default=5,
+        help="Number of IPs and paths to include in the Top N (defaults to 5)"
+    )
+    parser.add_argument(
+        "-q", "--quiet",
+        type=bool,
+        default=False,
+        help="Suppress line skip warnings (defaults to False)"
+    )
+
     args = parser.parse_args()
-    filename = args.filename
+    filename = args.file.name
     logging.info(f"Filename argument received: {filename}")
 
     # Define a parsing stats container
@@ -40,21 +59,14 @@ def main():
 
     # we'll use a generator, iterating over line in file from inside parse_lines
     # to yield a record, and aggregating and iterating over the recordset in aggregator
-    try:
-        logging.info(f"Opening {filename} file...")
-        with open(filename, "r", encoding="utf-8") as file:
-            record_stream = parse_lines(file, stats)
-            # file will close when we exit the indent, so we have to stay indented
-            # to keep the file openfor the generator
-            stats_report = aggregate(record_stream, stats)
-        logging.info(f"{filename} file closed.")
-    except FileNotFoundError:
-        logging.error(f"File not found: {filename}")
-        print(f"File not found: {filename}\n", file=sys.stderr)
-        sys.exit(2)
+    logging.info(f"Opening {filename} file...")
+    record_stream = parse_lines(args.file, stats, quiet=args.quiet)
+    stats_report = aggregate(record_stream, stats, top_n=args.top)
+    args.file.close()
+    logging.info(f"{filename} file closed.")
 
     # done with file access
-    formatted_report = reporter(stats_report)
+    formatted_report = reporter(stats_report, top_n=args.top)
     print(formatted_report)
 
     sys.exit(0)
