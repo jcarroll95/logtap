@@ -1,9 +1,16 @@
-from logtap.models import LogLine
+"""
+The aggregator.py module accepts parsed LogLine objects from parse_lines.py's generator, and also has access to the
+global stats object to incorporate parsing stats into its own total data that will be sent to the reporter. This file's
+output is a Report object which will be sent to the reporter.py module by cli.py.
+"""
+
+from typing import Iterator
+from logtap.models import LogLine, ParseStats
 from logtap.models import Report
 from collections import Counter
-from datetime import datetime, timezone
 
-def aggregate(records, stats):
+
+def aggregate(records: Iterator[LogLine], stats: ParseStats):
     """Aggregate parsed log records into a report object for later output"""
     status_counts = [0] * 6
     total_bytes = 0
@@ -13,10 +20,8 @@ def aggregate(records, stats):
     ip_counter = Counter()
     path_counter = Counter()
 
-    default_date = datetime(2000, 1, 1, tzinfo=timezone.utc)
-    timespan_start = default_date
-    timespan_end = default_date
-    first_timestamp = True
+    timespan_start = None
+    timespan_end = None
 
     for record in records:
         # we made status codes an int in the line parser
@@ -29,10 +34,9 @@ def aggregate(records, stats):
         path_counter[record.request_uri] += 1
         total_bytes += record.response_size or 0
 
-        if first_timestamp:
+        if timespan_start is None:
             timespan_start = record.timestamp
             timespan_end = record.timestamp
-            first_timestamp = False
         else:
             if record.timestamp < timespan_start:
                 timespan_start = record.timestamp
@@ -51,13 +55,13 @@ def aggregate(records, stats):
             "3xx": status_counts[3],
             "4xx": status_counts[4],
             "5xx": status_counts[5],
-            "other": status_other
+            "other": status_other,
         },
         total_bytes=total_bytes,
         top_ips=top_n_ips,
         top_paths=top_n_paths,
         timespan_start=timespan_start,
-        timespan_end=timespan_end
+        timespan_end=timespan_end,
     )
 
     return report

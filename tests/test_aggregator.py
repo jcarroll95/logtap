@@ -2,13 +2,38 @@ from logtap.models import LogLine, ParseStats
 from logtap.aggregator import aggregate
 from datetime import datetime, timezone
 
+
 def test_aggregate_counts_correctly():
     """Test that aggregation logic correctly calculates stats for report"""
     # Arrange: Create a few mock log records
     stats = ParseStats()
     records = [
-        LogLine("1.1.1.1", "-", "-", datetime.now(timezone.utc), "GET", "/", "HTTP/1.1", 200, 100, "-", "-"),
-        LogLine("1.1.1.1", "-", "-", datetime.now(timezone.utc), "GET", "/", "HTTP/1.1", 404, 50, "-", "-"),
+        LogLine(
+            "1.1.1.1",
+            "-",
+            "-",
+            datetime.now(timezone.utc),
+            "GET",
+            "/",
+            "HTTP/1.1",
+            200,
+            100,
+            "-",
+            "-",
+        ),
+        LogLine(
+            "1.1.1.1",
+            "-",
+            "-",
+            datetime.now(timezone.utc),
+            "GET",
+            "/",
+            "HTTP/1.1",
+            404,
+            50,
+            "-",
+            "-",
+        ),
     ]
     # Update stats manually as parse_lines would
     stats.total = 2
