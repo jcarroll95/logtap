@@ -18,7 +18,7 @@ class LogLine:
     request_method: str
     request_uri: str
     request_protocol: str
-    status_code: int | None
+    status_code: int
     response_size: int | None
     referrer: str
     user_agent: str

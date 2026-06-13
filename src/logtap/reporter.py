@@ -14,6 +14,9 @@ def as_text(report: Report, top_n: int) -> str:
     top_ips = "\n".join([f"  {ip}: {count}" for ip, count in report.top_ips])
     top_paths = "\n".join([f"  {path}: {count}" for path, count in report.top_paths])
 
+    start_str = report.timespan_start.strftime("%Y-%m-%d %H:%M:%S") if report.timespan_start else "N/A"
+    end_str = report.timespan_end.strftime("%Y-%m-%d %H:%M:%S") if report.timespan_end else "N/A"
+
     return f"""
 LOGTAP REPORT
 ===================
@@ -34,8 +37,8 @@ TOP {top_n} REQUESTED PATHS:
 {top_paths}
 
 TIME SPAN:
-  Start: {report.timespan_start:%Y-%m-%d %H:%M:%S}
-  End:   {report.timespan_end:%Y-%m-%d %H:%M:%S}
+  Start: {start_str}
+  End:   {end_str}
   
 ERROR RATE (4xx+5xx / total): {report.error_rate:.2f} %
 """
@@ -45,8 +48,10 @@ def as_json(report: Report, top_n: int) -> str:
     """This method generates a json-formatted report to be output by main as the log report"""
     payload = asdict(report)
 
-    payload["timespan_start"] = report.timespan_start.isoformat()
-    payload["timespan_end"] = report.timespan_end.isoformat()
+    # add a safety check for None
+    payload["timespan_start"] = report.timespan_start.isoformat() if report.timespan_start else None
+    payload["timespan_end"] = report.timespan_end.isoformat() if report.timespan_end else None
+
     payload["error_rate"] = report.error_rate
 
     payload["top_ips"] = [{"ip": ip, "count": count} for ip, count in report.top_ips]

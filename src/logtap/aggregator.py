@@ -3,7 +3,7 @@ The aggregator.py module accepts parsed LogLine objects from parse_lines.py's ge
 global stats object to incorporate parsing stats into its own total data that will be sent to the reporter. This file's
 output is a Report object which will be sent to the reporter.py module by cli.py.
 """
-
+from datetime import datetime
 from typing import Iterator
 from logtap.models import LogLine, ParseStats
 from logtap.models import Report
@@ -35,8 +35,8 @@ def aggregate(records: Iterator[LogLine], stats: ParseStats, top_n: int) -> Repo
         total_bytes += record.response_size or 0
 
         if timespan_start is None:
-            timespan_start = record.timestamp
-            timespan_end = record.timestamp
+            timespan_start = datetime.now()
+            timespan_end = timespan_start
         else:
             if record.timestamp < timespan_start:
                 timespan_start = record.timestamp
