@@ -16,13 +16,7 @@ from logtap.reporter import as_json, as_text
 def main():
     """The CLI main interface: accept arguments and run logtap on the specified file"""
 
-    # Set up the internal app log, root logger
-    logging.basicConfig(
-        # filename="logtap.log",
-        # filemode="a",  # 'a' to append, 'w' to overwrite
-        level=logging.INFO,  # Capture INFO and more severe logs
-        format="%(asctime)s - %(levelname)s - %(message)s",
-    )
+
 
     # Set up the CLI argument parser
     parser = argparse.ArgumentParser(
@@ -59,21 +53,30 @@ def main():
 
     args = parser.parse_args()
     filename = args.file.name
-    if not args.quiet:
-        logging.info(f"Filename argument received: {filename}")
+
+    # If quiet, only show CRITICAL errors. Otherwise, show everything from INFO up.
+    log_level = logging.CRITICAL if args.quiet else logging.INFO
+
+    # Set up the internal app log, root logger
+    logging.basicConfig(
+        # filename="logtap.log",
+        # filemode="a",  # 'a' to append, 'w' to overwrite
+        level=log_level,  # Capture INFO and more severe logs
+        format="%(asctime)s - %(levelname)s - %(message)s",
+    )
+
+    logging.info(f"Filename argument received: {filename}")
 
     # Define a parsing stats container
     stats = ParseStats()
 
     # we'll use a generator, iterating over line in file from inside parse_lines
     # to yield a record, and aggregating and iterating over the recordset in aggregator
-    if not args.quiet:
-        logging.info(f"Opening {filename} file...")
-    record_stream = parse_lines(args.file, stats, quiet=args.quiet)
+    logging.info(f"Opening {filename} file...")
+    record_stream = parse_lines(args.file, stats)
     stats_report = aggregate(record_stream, stats, top_n=args.top)
     args.file.close()
-    if not args.quiet:
-        logging.info(f"{filename} file closed.")
+    logging.info(f"{filename} file closed.")
 
     # done with file access
     if args.json:

@@ -23,7 +23,7 @@ def is_valid_ip(ip_str: str) -> bool:
 
 
 def parse_lines(
-    file: TextIO, stats: ParseStats, quiet: bool = False
+    file: TextIO, stats: ParseStats
 ) -> Iterator[LogLine]:
     """Parse log lines from a given file into record objects for aggregation"""
     logger = logging.getLogger(__name__)
@@ -62,8 +62,7 @@ def parse_lines(
         stats.total += 1
         match = LOG_PATTERN.match(line.strip())
         if not match:
-            if not quiet:
-                logger.warning(f"Skipping bad log line: \n{line.strip()}")
+            logger.warning(f"Skipping bad log line: \n{line.strip()}")
             stats.skipped += 1
             continue
 
@@ -79,15 +78,13 @@ def parse_lines(
             # Format: 10/Oct/2025:13:55:36 -0700
             ts = datetime.strptime(data["timestamp"], "%d/%b/%Y:%H:%M:%S %z")
         except ValueError:
-            if not quiet:
-                logger.warning(f"Skipping line with bad timestamp:  \n{line.strip()}")
+            logger.warning(f"Skipping line with bad timestamp:  \n{line.strip()}")
             stats.skipped += 1
             continue
 
         # validate request method, uri, protocol present
         if not data["method"] or not data["uri"] or not data["protocol"]:
-            if not quiet:
-                logger.warning(
+            logger.warning(
                     f"Skipping line with missing fields for method, uri, or protocol: \n{line.strip()}"
                 )
             stats.skipped += 1
@@ -97,8 +94,7 @@ def parse_lines(
         if data["status"].isdigit():
             status = int(data["status"])
         else:
-            if not quiet:
-                logger.warning(f"Skipping line with bad status code: \n{line.strip()}")
+            logger.warning(f"Skipping line with bad status code: \n{line.strip()}")
             stats.skipped += 1
             continue
 
