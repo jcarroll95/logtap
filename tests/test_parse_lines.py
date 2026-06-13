@@ -15,7 +15,7 @@ def test_parse_lines_valid_input():
     stats = ParseStats()
 
     # act
-    records = list(parse_lines(mock_file, stats, True))
+    records = list(parse_lines(mock_file, stats))
 
     # assert
     assert stats.total == 2
@@ -76,7 +76,7 @@ def test_parse_lines_bad_lines():
     stats = ParseStats()
 
     # act
-    records = list(parse_lines(mock_file, stats, True))
+    records = list(parse_lines(mock_file, stats))
 
     # assert
     assert records == []
@@ -93,7 +93,7 @@ def test_parse_lines_bad_size():
     mock_file = io.StringIO(raw_logs)
     stats = ParseStats()
 
-    records = list(parse_lines(mock_file, stats, True))
+    records = list(parse_lines(mock_file, stats))
 
     assert stats.total == 2
     assert records[0].response_size is None

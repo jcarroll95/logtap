@@ -7,7 +7,11 @@ authors = [
     { name = "James Carroll", email = "james@jamescarroll.info" }
 ]
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "fastapi>=0.136.3",
+    "python-multipart>=0.0.32",
+    "uvicorn[standard]>=0.49.0",
+]
 
 [project.scripts]
 logtap = "logtap.cli:main"
@@ -18,6 +22,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "pytest>=8.4.2",
     "ruff>=0.15.16",
 ]

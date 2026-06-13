@@ -11,12 +11,10 @@ from logtap.parse_lines import parse_lines
 from logtap.aggregator import aggregate
 from logtap.models import ParseStats
 from logtap.reporter import as_json, as_text
-
+from logtap.analyze import analyze
 
 def main():
     """The CLI main interface: accept arguments and run logtap on the specified file"""
-
-
 
     # Set up the CLI argument parser
     parser = argparse.ArgumentParser(
@@ -50,6 +48,12 @@ def main():
         action="store_true",
         help="Suppress line skip warnings. Quiet is off by default.",
     )
+    parser.add_argument(
+        "-a",
+        "--analyze",
+        action="store_true",
+        help="Call the analyze path on the given file."
+    )
 
     args = parser.parse_args()
     filename = args.file.name
@@ -72,21 +76,26 @@ def main():
 
     # we'll use a generator, iterating over line in file from inside parse_lines
     # to yield a record, and aggregating and iterating over the recordset in aggregator
-    logging.info(f"Opening {filename} file...")
-    record_stream = parse_lines(args.file, stats)
-    stats_report = aggregate(record_stream, stats, top_n=args.top)
-    args.file.close()
-    logging.info(f"{filename} file closed.")
+    if not args.analyze:
+        logging.info(f"Opening {filename} file...")
+        record_stream = parse_lines(args.file, stats)
+        stats_report = aggregate(record_stream, stats, top_n=args.top)
+        args.file.close()
+        logging.info(f"{filename} file closed.")
 
-    # done with file access
-    if args.json:
-        formatted_report = as_json(stats_report, top_n=args.top)
+        # done with file access
+        if args.json:
+            formatted_report = as_json(stats_report, top_n=args.top)
+        else:
+            formatted_report = as_text(stats_report, top_n=args.top)
+        print(formatted_report)
+
+        sys.exit(0)
     else:
-        formatted_report = as_text(stats_report, top_n=args.top)
-    print(formatted_report)
-
-    sys.exit(0)
-
+        stats_report = analyze(args.file, stats, top_n=args.top)
+        formatted_report = as_json(stats_report, top_n=args.top)
+        print(formatted_report)
+        sys.exit(0)
 
 # this is the guard that tells python to only execute the entire file if it's being used as the main entry point
 # of the program, not just having a function imported etc
