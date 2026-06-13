@@ -10,7 +10,7 @@ import logging
 from logtap.parse_lines import parse_lines
 from logtap.aggregator import aggregate
 from logtap.models import ParseStats
-from logtap.reporter import reporter
+from logtap.reporter import as_json, as_text
 
 
 def main():
@@ -18,8 +18,8 @@ def main():
 
     # Set up the internal app log, root logger
     logging.basicConfig(
-        #filename="logtap.log",
-        #filemode="a",  # 'a' to append, 'w' to overwrite
+        # filename="logtap.log",
+        # filemode="a",  # 'a' to append, 'w' to overwrite
         level=logging.INFO,  # Capture INFO and more severe logs
         format="%(asctime)s - %(levelname)s - %(message)s",
     )
@@ -35,38 +35,51 @@ def main():
         nargs="?",
         type=argparse.FileType("r"),
         default=sys.stdin,
-        help="Path to log file (defaults to stdin if omitted)"
+        help="Path to log file (defaults to stdin if omitted)",
     )
     parser.add_argument(
-        "-t", "--top",
+        "-j",
+        "--json",
+        action="store_true",
+        help="Output in JSON format (defaults to string)",
+    )
+    parser.add_argument(
+        "-t",
+        "--top",
         type=int,
         default=5,
-        help="Number of IPs and paths to include in the Top N (defaults to 5)"
+        help="Number of IPs and paths to include in the Top N (defaults to 5)",
     )
     parser.add_argument(
-        "-q", "--quiet",
-        type=bool,
-        default=False,
-        help="Suppress line skip warnings (defaults to False)"
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="Suppress line skip warnings. Quiet is off by default.",
     )
 
     args = parser.parse_args()
     filename = args.file.name
-    logging.info(f"Filename argument received: {filename}")
+    if not args.quiet:
+        logging.info(f"Filename argument received: {filename}")
 
     # Define a parsing stats container
     stats = ParseStats()
 
     # we'll use a generator, iterating over line in file from inside parse_lines
     # to yield a record, and aggregating and iterating over the recordset in aggregator
-    logging.info(f"Opening {filename} file...")
+    if not args.quiet:
+        logging.info(f"Opening {filename} file...")
     record_stream = parse_lines(args.file, stats, quiet=args.quiet)
     stats_report = aggregate(record_stream, stats, top_n=args.top)
     args.file.close()
-    logging.info(f"{filename} file closed.")
+    if not args.quiet:
+        logging.info(f"{filename} file closed.")
 
     # done with file access
-    formatted_report = reporter(stats_report, top_n=args.top)
+    if args.json:
+        formatted_report = as_json(stats_report, top_n=args.top)
+    else:
+        formatted_report = as_text(stats_report, top_n=args.top)
     print(formatted_report)
 
     sys.exit(0)

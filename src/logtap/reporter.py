@@ -4,9 +4,11 @@ a printable report string.
 """
 
 from logtap.models import Report
+import json
+from dataclasses import asdict
 
 
-def reporter(report: Report, top_n: int) -> str:
+def as_text(report: Report, top_n: int) -> str:
     """This method generates a formatted string to be output by main as the log report"""
 
     top_ips = "\n".join([f"  {ip}: {count}" for ip, count in report.top_ips])
@@ -37,3 +39,19 @@ TIME SPAN:
   
 ERROR RATE (4xx+5xx / total): {report.error_rate:.2f} %
 """
+
+
+def as_json(report: Report, top_n: int) -> str:
+    """This method generates a json-formatted report to be output by main as the log report"""
+    payload = asdict(report)
+
+    payload["timespan_start"] = report.timespan_start.isoformat()
+    payload["timespan_end"] = report.timespan_end.isoformat()
+    payload["error_rate"] = report.error_rate
+
+    payload["top_ips"] = [{"ip": ip, "count": count} for ip, count in report.top_ips]
+    payload["top_paths"] = [
+        {"path": path, "count": count} for path, count in report.top_paths
+    ]
+
+    return json.dumps(payload, indent=2)

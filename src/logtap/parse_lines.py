@@ -5,7 +5,7 @@ object to be passed to the aggregator.py which aggregates and processes the data
 track total, skipped, and parsed log lines.
 """
 
-from typing import TextIO, Any, Generator
+from typing import TextIO, Iterator
 import re
 import logging
 import ipaddress
@@ -14,6 +14,7 @@ from datetime import datetime
 
 
 def is_valid_ip(ip_str: str) -> bool:
+    """Return True if the string is a parseable IP address."""
     try:
         ipaddress.ip_address(ip_str)
         return True
@@ -21,7 +22,9 @@ def is_valid_ip(ip_str: str) -> bool:
         return False
 
 
-def parse_lines(file: TextIO, stats: ParseStats, quiet: bool) -> Generator[LogLine, Any, None]:
+def parse_lines(
+    file: TextIO, stats: ParseStats, quiet: bool = False
+) -> Iterator[LogLine]:
     """Parse log lines from a given file into record objects for aggregation"""
     logger = logging.getLogger(__name__)
 
@@ -42,18 +45,18 @@ def parse_lines(file: TextIO, stats: ParseStats, quiet: bool) -> Generator[LogLi
         r'"(?P<agent>.*?)"'
     )
 
-    """
-    Let's establish the minimum fields required for a valid log line:
-    - IP address must be present and not malformed (who)
-    - Timestamp must be enclosed in [], and parseable as a datetime object (when)
-    - Request method, URI, and protocol must be present (what)
-    - Status code must be present and parseable as an integer (result)
-    
-    Not required:
-    - RFC 1413 identity and User ID
-    - Response size
-    - referrer/user agent
-    """
+    #
+    # Let's establish the minimum fields required for a valid log line:
+    #    - IP address must be present and not malformed (who)
+    #    - Timestamp must be enclosed in [], and parseable as a datetime object (when)
+    #    - Request method, URI, and protocol must be present (what)
+    #    - Status code must be present and parseable as an integer (result)
+    #
+    # Not required:
+    #    - RFC 1413 identity and User ID
+    #    - Response size
+    #    - referrer/user agent
+    #
 
     for line in file:
         stats.total += 1
@@ -84,7 +87,9 @@ def parse_lines(file: TextIO, stats: ParseStats, quiet: bool) -> Generator[LogLi
         # validate request method, uri, protocol present
         if not data["method"] or not data["uri"] or not data["protocol"]:
             if not quiet:
-                logger.warning(f"Skipping line with missing fields for method, uri, or protocol: \n{line.strip()}")
+                logger.warning(
+                    f"Skipping line with missing fields for method, uri, or protocol: \n{line.strip()}"
+                )
             stats.skipped += 1
             continue
 
