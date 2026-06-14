@@ -1,15 +1,12 @@
 """
-The cli.py file contains our programs main entrypoint and interface. It accepts a file path argument and runs
-the sequence of parse_lines, aggragator, and reporter to translate log file data into memory objects and produce
-a printable report of those objects
+The cli.py file contains our program's CLI interface. It accepts a file path argument and runs
+the analyze module to produce a report object, then the reporter module to produce a formatted
+printable report of those objects
 """
 
 import argparse
 import sys
 import logging
-from logtap.parse_lines import parse_lines
-from logtap.aggregator import aggregate
-from logtap.models import ParseStats
 from logtap.reporter import as_json, as_text
 from logtap.analyze import analyze
 
@@ -48,12 +45,6 @@ def main():
         action="store_true",
         help="Suppress line skip warnings. Quiet is off by default.",
     )
-    parser.add_argument(
-        "-a",
-        "--analyze",
-        action="store_true",
-        help="Call the analyze path on the given file."
-    )
 
     args = parser.parse_args()
     filename = args.file.name
@@ -71,31 +62,21 @@ def main():
 
     logging.info(f"Filename argument received: {filename}")
 
-    # Define a parsing stats container
-    stats = ParseStats()
-
-    # we'll use a generator, iterating over line in file from inside parse_lines
-    # to yield a record, and aggregating and iterating over the recordset in aggregator
-    if not args.analyze:
-        logging.info(f"Opening {filename} file...")
-        record_stream = parse_lines(args.file, stats)
-        stats_report = aggregate(record_stream, stats, top_n=args.top)
+    # CLI is now just an interface to use the analyze service
+    logging.info(f"Opening {filename} file...")
+    stats_report = analyze(args.file, top_n=args.top)
+    if args.file is not sys.stdin:
         args.file.close()
-        logging.info(f"{filename} file closed.")
+    logging.info(f"{filename} file closed.")
 
-        # done with file access
-        if args.json:
-            formatted_report = as_json(stats_report, top_n=args.top)
-        else:
-            formatted_report = as_text(stats_report, top_n=args.top)
-        print(formatted_report)
-
-        sys.exit(0)
-    else:
-        stats_report = analyze(args.file, stats, top_n=args.top)
+    # done with file access
+    if args.json:
         formatted_report = as_json(stats_report, top_n=args.top)
-        print(formatted_report)
-        sys.exit(0)
+    else:
+        formatted_report = as_text(stats_report, top_n=args.top)
+    print(formatted_report)
+
+    sys.exit(0)
 
 # this is the guard that tells python to only execute the entire file if it's being used as the main entry point
 # of the program, not just having a function imported etc

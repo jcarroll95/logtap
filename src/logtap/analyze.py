@@ -11,9 +11,11 @@ from logtap.models import ParseStats, Report
 from logtap.parse_lines import parse_lines
 
 def analyze(
-    stream: TextIO, stats: ParseStats, top_n: int
+    stream: TextIO, top_n: int
 ) -> Report:
     """This function takes a text stream or iterable of lines and runs parse and aggregate on them, returning a report"""
+
+    stats = ParseStats()
 
     record_stream = parse_lines(stream, stats)
     stats_report = aggregate(record_stream, stats, top_n)
