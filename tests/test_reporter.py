@@ -99,7 +99,7 @@ def test_reporter_json_calculation():
     )
 
     # act
-    output_payload = as_json(report, 5)
+    output_payload = as_json(report)
     expected_json_value = f"{report.error_rate:.1f}"
 
     # assert
@@ -129,7 +129,7 @@ def test_reporter_json_empty_file():
     )
 
     # act
-    output_payload = as_json(report, 5)
+    output_payload = as_json(report)
     expected_json_value = f"{report.error_rate:.1f}"
 
     # assert

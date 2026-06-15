@@ -71,7 +71,7 @@ def main():
 
     # done with file access
     if args.json:
-        formatted_report = as_json(stats_report, top_n=args.top)
+        formatted_report = as_json(stats_report)
     else:
         formatted_report = as_text(stats_report, top_n=args.top)
     print(formatted_report)
