@@ -19,7 +19,7 @@ def create_job(upload: UploadFile, top_n: int = Query(default=5, ge=1, le=100)):
         logger.info(upload.filename)
         logger.info(e)
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail="Uploaded file must be UTF-8 encoded text"
         )
     

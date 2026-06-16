@@ -43,15 +43,8 @@ TIME SPAN:
 ERROR RATE (4xx+5xx / total): {report.error_rate:.2f} %
 """
 
-
-def as_json(report: Report) -> str:
-    """This method generates a json-formatted report to be output by main as the log report"""
-    output_dict = build_dict(report)
-
-    return json.dumps(output_dict, indent=2)
-
 def build_dict(report: Report) -> dict:
-    """This method generates a dict-formatted report to be output by main as the log report"""
+    """This method generates a dict containing the report data"""
     payload = asdict(report)
 
     # add a safety check for None
@@ -66,3 +59,9 @@ def build_dict(report: Report) -> dict:
     ]
 
     return payload
+
+def as_json(report: Report) -> str:
+    """This method generates a json-formatted report to be output by main as the log report"""
+    output_dict = build_dict(report)
+
+    return json.dumps(output_dict, indent=2)
