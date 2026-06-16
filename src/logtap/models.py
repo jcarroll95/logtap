@@ -6,8 +6,9 @@ parsed log data for reporting purposes.
 """
 
 from dataclasses import dataclass
+from pydantic import BaseModel
 from datetime import datetime
-
+from typing import List
 
 @dataclass(frozen=True)
 class LogLine:
@@ -51,3 +52,21 @@ class Report:
             self.status_classes["4xx"] + self.status_classes["5xx"]
         ) / self.lines_parsed
         return round(rate * 100, 2)
+
+
+
+class ItemCount(BaseModel):
+    name: str # e.g., for IP or Path
+    count: int
+
+class JobResponse(BaseModel):
+    lines_total: int
+    lines_parsed: int
+    lines_skipped: int
+    status_classes: dict[str, int]
+    total_bytes: int
+    top_ips: List[ItemCount]
+    top_paths: List[ItemCount]
+    timespan_start: datetime
+    timespan_end: datetime
+    error_rate: float
