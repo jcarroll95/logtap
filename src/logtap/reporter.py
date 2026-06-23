@@ -3,7 +3,7 @@ The reporter.py module is responsible for converting the Report object containin
 a printable report string.
 """
 
-from logtap.models import Report
+from logtap.domain import Report
 import json
 from dataclasses import asdict
 

@@ -1,7 +1,7 @@
 import io
 from fastapi import FastAPI, Query, UploadFile, HTTPException, Depends
 from logtap.analyze import analyze
-from logtap.models import JobResponse, ItemCount
+from logtap.schemas import JobResponse, ItemCount
 from sqlalchemy.ext.asyncio import AsyncSession
 from logtap.database import get_db
 import logging
@@ -29,6 +29,9 @@ async def create_job(
         )
 
     # we need to store output somewhere, a list with the uuid
+    # output is a Record dataclass
+    # db.add() is a sqlalchemy function expecting an object from my schema: a jobrecord
+    # I need to map output into a new jobresponse instance then add THAT to the db
     db.add(output)
     await db.commit()
     # we need to return job id and status

@@ -9,7 +9,7 @@ from typing import TextIO, Iterator
 import re
 import logging
 import ipaddress
-from logtap.models import LogLine, ParseStats
+from logtap.domain import LogLine, ParseStats
 from datetime import datetime
 
 

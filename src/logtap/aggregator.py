@@ -5,8 +5,7 @@ output is a Report object which will be sent to the reporter.py module by cli.py
 """
 from datetime import datetime, timezone
 from typing import Iterator
-from logtap.models import LogLine, ParseStats
-from logtap.models import Report
+from logtap.domain import LogLine, ParseStats, Report
 from collections import Counter
 
 

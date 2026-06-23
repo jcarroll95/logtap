@@ -7,7 +7,7 @@ log policy decisions, or exit.
 from typing import TextIO
 
 from logtap.aggregator import aggregate
-from logtap.models import ParseStats, Report
+from logtap.domain import ParseStats, Report
 from logtap.parse_lines import parse_lines
 
 def analyze(
