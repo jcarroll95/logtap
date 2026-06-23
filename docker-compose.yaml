@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:alpine
+    container_name: logtap-postgres
+    environment:
+      POSTGRES_USER: my_user
+      POSTGRES_PASSWORD: my_secure_password
+      POSTGRES_DB: my_database
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/logtapdata
+    restart: unless-stopped
+
+volumes:
+  pgdata:

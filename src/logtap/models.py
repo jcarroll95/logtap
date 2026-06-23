@@ -9,6 +9,11 @@ from dataclasses import dataclass
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import JSON, DateTime
+from logtap.database import Base # The Base we defined earlier
+from logtap.schemas import ItemCount
+
 
 @dataclass(frozen=True)
 class LogLine:
@@ -55,18 +60,26 @@ class Report:
 
 
 
-class ItemCount(BaseModel):
-    name: str # e.g., for IP or Path
-    count: int
 
-class JobResponse(BaseModel):
-    lines_total: int
-    lines_parsed: int
-    lines_skipped: int
-    status_classes: dict[str, int]
-    total_bytes: int
-    top_ips: List[ItemCount]
-    top_paths: List[ItemCount]
-    timespan_start: datetime
-    timespan_end: datetime
-    error_rate: float
+class JobRecord(Base):
+    __tablename__ = "jobs"
+
+    # Primary Key
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    lines_total: Mapped[int] = mapped_column()
+    lines_parsed: Mapped[int] = mapped_column()
+    lines_skipped: Mapped[int] = mapped_column()
+    status_classes: Mapped[dict[str, int]]  = mapped_column()
+    total_bytes: Mapped[int] = mapped_column()
+    top_ips: Mapped[List[ItemCount]] = mapped_column()
+    top_paths: Mapped[List[ItemCount]] = mapped_column()
+    timespan_start: Mapped[datetime] = mapped_column()
+    timespan_end: Mapped[datetime] = mapped_column()
+
+    # ... other fields ...
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
+    @property
+    def is_active(self) -> bool:
+        return True
