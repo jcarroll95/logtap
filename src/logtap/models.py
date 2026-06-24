@@ -8,12 +8,19 @@ from typing import List
 from sqlalchemy.orm import Mapped, mapped_column
 from logtap.database import Base
 from logtap.schemas import ItemCount
+import uuid
 
 class JobRecord(Base):
     __tablename__ = "jobs"
 
     # Primary Key
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[uuid.UUID] = mapped_column(
+        uuid.UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4
+    )
+
+    # id: Mapped[int] = mapped_column(primary_key=True)
 
     lines_total: Mapped[int] = mapped_column()
     lines_parsed: Mapped[int] = mapped_column()

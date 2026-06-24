@@ -1,6 +1,5 @@
 """Schemas.py defines pydantic objects for use at the controller layer. We will serialize/deserialize from these definitions."""
-
-
+import uuid
 from datetime import datetime
 from typing import List
 from pydantic import BaseModel
@@ -13,7 +12,7 @@ class ItemCount(BaseModel):
         from_attributes = True  # This allows Pydantic to read SQLAlchemy objects
 
 class JobResponse(BaseModel):
-
+    id: uuid.UUID
     lines_total: int
     lines_parsed: int
     lines_skipped: int
